@@ -1,0 +1,15 @@
+.Url {
+	display: flex;
+	justify-content: center;
+	margin: 15px;
+}
+
+.Url > div > button {
+	padding: 10px;
+}
+
+#urlinput {
+	margin-right: 4px;
+	width: 40vw;
+	padding: 10px;
+}

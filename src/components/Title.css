@@ -1,0 +1,16 @@
+.Title {
+/* 	display: flex;
+	flex-direction: column; */
+}
+
+p {
+	color: #F2F2F2;
+	/* rgb(90, 39, 124); */
+	font-size: 1.5rem;
+/* 	margin: 0 0 2rem 0;
+ */}
+
+.Title > p:first-child {
+	margin: 0 0 3rem 0;
+}
+

@@ -1,0 +1,14 @@
+#description {
+	display: flex;
+	flex-direction: column;
+	text-align: left;
+	margin-left: 20px;
+}
+
+#name {
+	display: none;
+}
+
+#age {
+	display: none;
+}

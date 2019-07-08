@@ -1,0 +1,19 @@
+.Logo {
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+	align-items: center;
+	width: 150px;
+	margin-top: 15px;
+	margin-left: 12vw;
+ }
+
+.Logo > p {
+	font-size: 1.5rem;
+	color: #636E80;
+	margin: 0;
+}
+
+.Logo > img {
+	width: auto;
+}
