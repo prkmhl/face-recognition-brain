@@ -3,12 +3,14 @@ import './App.css';
 import Particles from 'react-particles-js';
 import Clarifai from 'clarifai';
 
-import Sign from '../components/Sign';
+import Navigation from '../components/Navigation';
 import Logo from '../components/Logo';
 import Title from '../components/Title';
 import Url from '../components/Url';
 import Photo from '../components/Photo';
 import Description from '../components/Description';
+import Signin from '../components/Signin';
+import Register from '../components/Register';
 
 const app = new Clarifai.App({
  apiKey: 'e108712b85dd4d89afb81c64de341a71'
@@ -34,9 +36,11 @@ class App extends React.Component {
 			imageUrl: '',
 			box: '',
 			name: '',
-			nameProbability: '',
+				nameProbability: '',
 			age: '',
-			ageProbability: '',
+				ageProbability: '',
+			route: 'signin',
+			isSignedIn: false,
 		}
 	}
 
@@ -66,6 +70,8 @@ class App extends React.Component {
 		this.setState({nameProbability: clarifaiProbability});
 		if (clarifaiProbability > 0.2) {
 			document.getElementById('name').style.display = 'flex';
+		} else {
+			document.getElementById('name').style.display = 'none';
 		}
 	}
 
@@ -110,26 +116,55 @@ class App extends React.Component {
 			.catch(err => console.log(err));
 	}
 
+	onRouteChange = (route) => {
+		route === 'home'
+			? this.setState({isSignedIn: true})
+			: this.setState({isSignedIn: false});
+		this.setState({route: route});
+
+
+		// route === 'home'
+			// ? document.getElementById('Navigation').style.display = 'flex'
+			// : document.getElementById('Navigation').style.display = 'none';
+
+		// this.state.route === 'signin'             // this is not good solution, clicking on sign out on sign in page brings one to homepage
+		// 	? this.setState({route: 'homepage'})
+		// 	: this.setState({route: 'signin'});
+	}
+
 	render() {
+		const { isSignedIn, imageUrl, route, box, name,
+			nameProbability, age, ageProbability } = this.state;
 	  return (
 	    <div className="App">
 	      <Particles className='particles'
 	      	params={particlesOptions}
 	      />
-	      <div id='containerLogoSign'>
+      	<div id='containerLogoSign'>
 	      	<Logo />
-	      	<Sign />
+	      	<Navigation isSignedIn={isSignedIn}
+	      							onRouteChange={this.onRouteChange} />
 	      </div>
-	      <Title />
-	      <Url onInputChange={this.onInputChange}
-	      	onButtonSubmit={this.onButtonSubmit}/>
-	      <div id='containerPhotoDescr'>
-	      	<Photo imageUrl={this.state.imageUrl} box={this.state.box}/>
-	      	<Description name={this.state.name}
-	      							 nameProbability={this.state.nameProbability}
-	      							 age={this.state.age}
-	      							 ageProbability={this.state.ageProbability}/>
-	    	</div>
+	      { route === 'home'
+	      	? <div>
+				      <Title />
+				      <Url
+				      	onInputChange={this.onInputChange}
+				      	onButtonSubmit={this.onButtonSubmit} />
+				      <div id='containerPhotoDescr'>
+				      	<Photo imageUrl={imageUrl} box={box} />
+				      	<Description name={name}
+				      							 nameProbability={nameProbability}
+				      							 age={age}
+				      							 ageProbability={ageProbability} />
+				    	</div>
+				    </div>
+				  : (
+				  	  route === 'signin'
+				  		? <Signin onRouteChange={this.onRouteChange} />
+				  		: <Register onRouteChange={this.onRouteChange} />
+				  	)
+	      }
 	    </div>
 	  );
 	}

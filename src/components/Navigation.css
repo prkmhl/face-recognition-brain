@@ -1,0 +1,20 @@
+.Navigation {
+	display: flex;
+	justify-content: flex-end;
+	align-items: flex-start;
+	margin-top: 20px;
+	margin-right: 12vw;
+}
+
+.Navigation  p {
+	color: lightgray;
+	/* rgb(62, 201, 120); */
+	font-size: 1.3rem;
+	padding-left: 20px;
+	cursor: pointer;
+}
+
+.Navigation > p:hover {
+	color: white;
+	transition: .3s ease-in-out;
+}
