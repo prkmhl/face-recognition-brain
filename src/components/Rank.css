@@ -1,4 +1,4 @@
-.Title {
+.Rank {
 /* 	display: flex;
 	flex-direction: column; */
 }
@@ -10,7 +10,7 @@ p {
 /* 	margin: 0 0 2rem 0;
  */}
 
-.Title > p:first-child {
+.Rank > p:first-child {
 	margin: 0 0 3rem 0;
 }
 

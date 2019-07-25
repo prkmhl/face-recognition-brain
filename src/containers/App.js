@@ -1,20 +1,21 @@
+// possible improvements:
+// - input validation
+// - more boxes on photo
+// - profile pages
+// - ranking
+
 import React from 'react';
 import './App.css';
 import Particles from 'react-particles-js';
-import Clarifai from 'clarifai';
 
 import Navigation from '../components/Navigation';
 import Logo from '../components/Logo';
-import Title from '../components/Title';
+import Rank from '../components/Rank';
 import Url from '../components/Url';
 import Photo from '../components/Photo';
 import Description from '../components/Description';
 import Signin from '../components/Signin';
 import Register from '../components/Register';
-
-const app = new Clarifai.App({
- apiKey: 'e108712b85dd4d89afb81c64de341a71'
-});
 
 const particlesOptions = {
 	particles: {
@@ -28,20 +29,48 @@ const particlesOptions = {
 	}
 }
 
+const initialState = {
+	input: '',
+	imageUrl: '',
+	box: '',
+	photoName: '',
+		nameProbability: '',
+	age: '',
+		ageProbability: '',
+	route: 'signin',
+	isSignedIn: false,
+	user: {
+		id: '',
+		name: '',
+		email: '',
+		entries: 0,
+		joined: ''
+	}
+}
+
 class App extends React.Component {
 	constructor() {
 		super();
-		this.state = {
-			input: '',
-			imageUrl: '',
-			box: '',
-			name: '',
-				nameProbability: '',
-			age: '',
-				ageProbability: '',
-			route: 'signin',
-			isSignedIn: false,
-		}
+		this.state = initialState;
+		console.log(this.state);
+	}
+	// componentDidMount() {               //not needed any more, only to check if fetching works
+	// 	fetch('http://localhost:3001/')
+	// 	.then(response => response.json())
+	// 	.then(console.log)  //shorthand for .then(data => console.log(data));
+	// }
+
+	loadUser = (data) => {
+		this.setState({
+			user: {
+				id: data.id,
+				name: data.name,
+				email: data.email,
+				entries: data.entries,
+				joined: data.joined
+			}
+		})
+		console.log(this.state);
 	}
 
 	calculateFaceLocation = (clarifaiResponse) => {
@@ -66,7 +95,7 @@ class App extends React.Component {
 	displayName = (clarifaiResponse) => {
 		const clarifaiName = clarifaiResponse.outputs[0].data.regions[0].data.face.identity.concepts[0].name;
 		const clarifaiProbability = clarifaiResponse.outputs[0].data.regions[0].data.face.identity.concepts[0].value;
-		this.setState({name: clarifaiName});
+		this.setState({photoName: clarifaiName});
 		this.setState({nameProbability: clarifaiProbability});
 		if (clarifaiProbability > 0.2) {
 			document.getElementById('name').style.display = 'flex';
@@ -88,41 +117,77 @@ class App extends React.Component {
 		this.setState({input: event.target.value});
 	}
 
-	onButtonSubmit = () => {
+	onPhotoSubmit = () => {
 		this.setState({imageUrl: this.state.input});
 		
-		app.models
-			.predict(
-				'e466caa0619f444ab97497640cefc4dc',  // CELEBRITY_MODEL
-				this.state.input) // !!! must be .input, not .imageUrl --> explanation Lesson 230
-			.then(response => {
-				this.displayFaceBox(this.calculateFaceLocation(response)) // this == App (in arrow function)
-				this.displayName(response);
-				console.log(response.outputs[0].data.regions[0].data.face.identity.concepts[0].name,
-					response.outputs[0].data.regions[0].data.face.identity.concepts[0].value);
+		fetch('http://localhost:3001/imageAPIcelebrity/', {    // CELEBRITY_MODEL
+			method: 'post',
+			headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify({
+				input: this.state.input
 			})
-			.catch(err => console.log(err));
+		})  // => server =>
+			.then(clarifaiResponse => clarifaiResponse.json())   // !! when with curly brackets --> must be   RETURN clarifaiRes....
+			.then(response => {
+				if (response) {
+					this.displayFaceBox(this.calculateFaceLocation(response)) // this == App (in arrow function)
+					this.displayName(response);
+					console.log(response.outputs[0].data.regions[0].data.face.identity.concepts[0].name,
+						response.outputs[0].data.regions[0].data.face.identity.concepts[0].value);
+					}
+				})
+			.catch(err => console.log(err))
 
-			app.models
-			.predict(
-				'c0c0ac362b03416da06ab3fa36fb58e3',  // DEMOGRAPHICS_MODEL
-				this.state.input) // !!! must be .input, not .imageUrl --> explanation Lesson 230
+		fetch('http://localhost:3001/imageAPIdemographics/', {   // DEMOGRAPHICS MODEL
+			method: 'post',
+			headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify({
+				input: this.state.input
+			})
+		})  // => server =>
+			.then(clarifaiResponse => clarifaiResponse.json())   // !! when with curly brackets --> must be   RETURN clarifaiRes....
 			.then(response => {
-				this.displayAge(response);
-				// console.log(response);
-				console.log(response.outputs[0].data.regions[0].data.face.age_appearance.concepts[0].name,
-					response.outputs[0].data.regions[0].data.face.age_appearance.concepts[0].value);
+				if (response) {
+					this.displayAge(response);
+					// console.log(response);
+					console.log(response.outputs[0].data.regions[0].data.face.age_appearance.concepts[0].name,
+						response.outputs[0].data.regions[0].data.face.age_appearance.concepts[0].value);
+				}
 			})
 			.catch(err => console.log(err));
+			
+		fetch('http://localhost:3001/imageCount/', {
+			method: 'put',
+			headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify({
+				id: this.state.user.id
+			})
+		})  // => server =>
+			.then(response => response.json())
+			.then(count => {
+				this.setState(prevState => ({   //Solution from Andrei not good: this.setState(Object.assign(this.state.user, { entries: count }));  this messes up state, properties of user go step up to main object.
+										// explanation: https://stackoverflow.com/questions/43638938/updating-an-object-with-setstate-in-react
+										//							https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign
+					...prevState,
+					user: {
+						...prevState.user,
+						entries: count
+					}
+				}))
+			})
+			.catch(console.log)
 	}
 
 	onRouteChange = (route) => {
-		route === 'home'
-			? this.setState({isSignedIn: true})
-			: this.setState({isSignedIn: false});
-		this.setState({route: route});
-
-
+		if (route === 'signout') {
+			this.setState(initialState);
+		} else if (route === 'home') {
+			this.setState({isSignedIn: true});
+		}
+		this.setState({route: route})
+		console.log(this.state);
+	}
+				
 		// route === 'home'
 			// ? document.getElementById('Navigation').style.display = 'flex'
 			// : document.getElementById('Navigation').style.display = 'none';
@@ -130,10 +195,9 @@ class App extends React.Component {
 		// this.state.route === 'signin'             // this is not good solution, clicking on sign out on sign in page brings one to homepage
 		// 	? this.setState({route: 'homepage'})
 		// 	: this.setState({route: 'signin'});
-	}
 
 	render() {
-		const { isSignedIn, imageUrl, route, box, name,
+		const { isSignedIn, imageUrl, route, box, photoName,
 			nameProbability, age, ageProbability } = this.state;
 	  return (
 	    <div className="App">
@@ -147,22 +211,27 @@ class App extends React.Component {
 	      </div>
 	      { route === 'home'
 	      	? <div>
-				      <Title />
+							<Rank name={this.state.user.name}
+										entries={this.state.user.entries} />
 				      <Url
 				      	onInputChange={this.onInputChange}
-				      	onButtonSubmit={this.onButtonSubmit} />
+				      	onPhotoSubmit={this.onPhotoSubmit} />
 				      <div id='containerPhotoDescr'>
 				      	<Photo imageUrl={imageUrl} box={box} />
-				      	<Description name={name}
+				      	<Description photoName={photoName}
 				      							 nameProbability={nameProbability}
 				      							 age={age}
 				      							 ageProbability={ageProbability} />
 				    	</div>
 				    </div>
 				  : (
-				  	  route === 'signin'
-				  		? <Signin onRouteChange={this.onRouteChange} />
-				  		: <Register onRouteChange={this.onRouteChange} />
+				  	  route === 'register'
+							? <Register onRouteChange={this.onRouteChange}
+							loadUser={this.loadUser}
+							/>
+				  		: <Signin onRouteChange={this.onRouteChange}
+												loadUser={this.loadUser}
+								/>
 				  	)
 	      }
 	    </div>

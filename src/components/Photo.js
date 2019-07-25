@@ -2,7 +2,6 @@ import React from 'react';
 import './Photo.css';
 
 const Photo = ({ imageUrl, box }) => {
-	// let src ='https://upload.wikimedia.org/wikipedia/commons/7/7a/Mahatma-Gandhi%2C_studio%2C_1931.jpg'
 	return (
 		<div className='Photo'>
 			<div className='container'>
