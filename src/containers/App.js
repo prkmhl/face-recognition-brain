@@ -120,7 +120,7 @@ class App extends React.Component {
 	onPhotoSubmit = () => {
 		this.setState({imageUrl: this.state.input});
 		
-		fetch('http://localhost:3001/imageAPIcelebrity/', {    // CELEBRITY_MODEL
+		fetch('https://desolate-brook-49357.herokuapp.com/imageAPIcelebrity/', {    // CELEBRITY_MODEL
 			method: 'post',
 			headers: {'Content-Type': 'application/json'},
 			body: JSON.stringify({
@@ -138,7 +138,7 @@ class App extends React.Component {
 				})
 			.catch(err => console.log(err))
 
-		fetch('http://localhost:3001/imageAPIdemographics/', {   // DEMOGRAPHICS MODEL
+		fetch('https://desolate-brook-49357.herokuapp.com/imageAPIdemographics/', {   // DEMOGRAPHICS MODEL
 			method: 'post',
 			headers: {'Content-Type': 'application/json'},
 			body: JSON.stringify({
@@ -156,7 +156,7 @@ class App extends React.Component {
 			})
 			.catch(err => console.log(err));
 			
-		fetch('http://localhost:3001/imageCount/', {
+		fetch('https://desolate-brook-49357.herokuapp.com/imageCount/', {
 			method: 'put',
 			headers: {'Content-Type': 'application/json'},
 			body: JSON.stringify({
