@@ -93,8 +93,8 @@ class App extends React.Component {
 	}
 
 	displayName = (clarifaiResponse) => {
-		const clarifaiName = clarifaiResponse.outputs[0].data.regions[0].data.face.identity.concepts[0].name;
-		const clarifaiProbability = clarifaiResponse.outputs[0].data.regions[0].data.face.identity.concepts[0].value;
+		const clarifaiName = clarifaiResponse.outputs[0].data.regions[0].data.concepts[0].name;
+		const clarifaiProbability = clarifaiResponse.outputs[0].data.regions[0].data.concepts[0].value;
 		this.setState({photoName: clarifaiName});
 		this.setState({nameProbability: clarifaiProbability});
 		if (clarifaiProbability > 0.2) {
@@ -105,8 +105,8 @@ class App extends React.Component {
 	}
 
 	displayAge = (clarifaiResponse) => {
-		const clarifaiAge = clarifaiResponse.outputs[0].data.regions[0].data.face.age_appearance.concepts[0].name;
-		const clarifaiProbability = clarifaiResponse.outputs[0].data.regions[0].data.face.age_appearance.concepts[0].value;
+		const clarifaiAge = clarifaiResponse.outputs[0].data.regions[0].data.concepts[0].name;
+		const clarifaiProbability = clarifaiResponse.outputs[0].data.regions[0].data.concepts[0].value;
 		this.setState({age: clarifaiAge});
 		this.setState({ageProbability: clarifaiProbability});
 		document.getElementById('age').style.display = 'flex';
@@ -130,10 +130,11 @@ class App extends React.Component {
 			.then(clarifaiResponse => clarifaiResponse.json())   // !! when with curly brackets --> must be   RETURN clarifaiRes....
 			.then(response => {
 				if (response) {
+					console.log(response);
 					this.displayFaceBox(this.calculateFaceLocation(response)) // this == App (in arrow function)
 					this.displayName(response);
-					console.log(response.outputs[0].data.regions[0].data.face.identity.concepts[0].name,
-						response.outputs[0].data.regions[0].data.face.identity.concepts[0].value);
+					console.log(response.outputs[0].data.regions[0].data.concepts[0].name,
+						response.outputs[0].data.regions[0].data.concepts[0].value);
 					}
 				})
 			.catch(err => console.log(err))
